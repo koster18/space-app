@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Sky Map</title>
+  <script>
+    let autoRefreshEnabled = false;
+
+    function sendUpdateRequest() {
+      const formData = new FormData(document.querySelector('form'));
+      const params = new URLSearchParams();
+
+      for (const [key, value] of formData.entries()) {
+        params.append(key, value);
+      }
+      params.append('action', 'update');
+
+      fetch('/skymap', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString() + (autoRefreshEnabled ? '&autoUpdate=true' : '')
+      })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(`Network response was not ok: ${response.statusText}`);
+                }
+                return response.text();
+              })
+              .then(html => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+
+                const newSkyMapImageElement = tempDiv.querySelector('#skyMapImage');
+                if (newSkyMapImageElement) {
+                  const newSkyMapImageSrc = newSkyMapImageElement.getAttribute('src');
+                  updateSkyMap(newSkyMapImageSrc);
+                } else {
+                  console.error('Элемент с ID skyMapImage не найден в ответе');
+                }
+              })
+              .catch(error => console.error('Error:', error));
+    }
+
+
+
+    function updateSkyMap(skyMapImage) {
+      const skyMapImageElement = document.getElementById('skyMapImage');
+      skyMapImageElement.src = skyMapImage;
+    }
+
+    function autoRefresh() {
+      if (autoRefreshEnabled) {
+        clearInterval(window.autoRefreshInterval);
+        window.autoRefreshInterval = setInterval(() => {
+          updateDateTime();
+          sendUpdateRequest();
+        }, 1000);
+      } else {
+        clearInterval(window.autoRefreshInterval);
+      }
+    }
+
+
+
+    function toggleAutoRefresh(checkbox) {
+      autoRefreshEnabled = checkbox.checked;
+      autoRefresh();
+    }
+
+
+    function updateDateTime() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+
+      document.getElementById('localDate').value = `${year}-${month}-${day}`;
+      document.getElementById('localHours').value = hours;
+      document.getElementById('localMinutes').value = minutes;
+      document.getElementById('localSeconds').value = seconds;
+    }
+
+  </script>
+</head>
+<body>
+<h1>Sky Map</h1>
+
+<form action="/skymap" method="post">
+  <label for="address-input">Введите адрес</label>
+  <input type="text" id="address-input" name="address">
+  <button type="submit" name="action" value="getCoordinates">Получить координаты</button>
+
+  <div>
+    <p th:text="${error}" style="color: red;"></p>
+    <p id="coordinates" th:text="'Координаты наблюдателя: Широта: ' + ${latitude} + ', Долгота: ' + ${longitude}">Координаты будут здесь</p>
+  </div>
+
+  <label for="localDate">Дата и время:</label>
+  <input type="date" id="localDate" name="localDate"
+         th:value="${currentDate}" required/>
+
+  <label for="localHours">Часы:</label>
+  <input type="number" id="localHours" name="localHours" min="0" max="23"
+         th:value="${currentHours}" required/>
+
+  <label for="localMinutes">Минуты:</label>
+  <input type="number" id="localMinutes" name="localMinutes" min="0" max="59"
+         th:value="${currentMinutes}" required/>
+
+  <label for="localSeconds">Секунды:</label>
+  <input type="number" id="localSeconds" name="localSeconds" min="0" max="59"
+         th:value="${currentSeconds}" required/>
+
+  <label for="timeZone">Временная зона (UTC):</label>
+  <select id="timeZone" name="timeZone" required>
+    <option value="">Выберите временную зону</option>
+    <option th:each="offset : ${offsets}"
+            th:value="${offset}"
+            th:text="'UTC ' + ${(offset >= 0 ? '+' + offset : offset)} + ':00'"
+            th:selected="${offset == zoneOffset}"></option>
+  </select>
+
+  <div>
+    <label>
+      <input type="checkbox" name="autoUpdate" th:checked="${autoUpdate}" onchange="toggleAutoRefresh(this)"/>
+      Автообновление
+    </label>
+  </div>
+
+  <div>
+    <label>
+      <input type="checkbox" name="showStars" th:checked="${showStars}"/>
+      Показывать звезды
+    </label>
+  </div>
+  <div>
+    <label>
+      <input type="checkbox" name="showConstellationLines" th:checked="${showConstellationLines}"/>
+      Показывать линии созвездий
+    </label>
+  </div>
+  <div>
+    <label>
+      <input type="checkbox" name="showSmallSatellites" th:checked="${showSmallSatellites}"/>
+      Показывать малые спутники
+    </label>
+    <button type="submit" name="action" value="updateSmallSatellites">Обновить координаты малых спутников</button>
+    <a href="/satellites">Перейти к базе данных космических станций</a>
+  </div>
+  <div>
+    <label>
+      <input type="checkbox" name="showSatellites" th:checked="${showSatellites}"/>
+      Показывать космические станции
+    </label>
+    <button type="submit" name="action" value="updateSatellites">Обновить координаты космических станций</button>
+    <a href="/spacestations">Перейти к базе данных космических станций</a>
+  </div>
+
+  <button type="submit" name="action" value="update">Обновить карту</button>
+</form>
+
+<img id="skyMapImage" th:src="${skyMapImage}" alt="Sky Map"/>
+</body>
+</html>

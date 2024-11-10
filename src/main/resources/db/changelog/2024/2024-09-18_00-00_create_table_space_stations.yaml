@@ -1,0 +1,108 @@
+databaseChangeLog:
+  - changeSet:
+      id: 3
+      author: sterkhovkv
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: space_stations
+      changes:
+        - createTable:
+            tableName: space_stations
+            columns:
+              - column:
+                  name: id
+                  type: INTEGER
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: object_name
+                  type: text
+                  constraints:
+                    nullable: true
+              - column:
+                  name: epoch
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: true
+              - column:
+                  name: mean_motion
+                  type: double precision
+                  constraints:
+                    nullable: true
+              - column:
+                  name: eccentricity
+                  type: double precision
+                  constraints:
+                    nullable: true
+              - column:
+                  name: inclination
+                  type: double precision
+                  constraints:
+                    nullable: true
+              - column:
+                  name: ra_of_asc_node
+                  type: double precision
+                  constraints:
+                    nullable: true
+              - column:
+                  name: arg_of_pericenter
+                  type: double precision
+                  constraints:
+                    nullable: true
+              - column:
+                  name: mean_anomaly
+                  type: double precision
+                  constraints:
+                    nullable: true
+              - column:
+                  name: classification_type
+                  type: text
+                  constraints:
+                    nullable: true
+              - column:
+                  name: norad_cat_id
+                  type: int
+                  constraints:
+                    nullable: true
+              - column:
+                  name: rev_at_epoch
+                  type: int
+                  constraints:
+                    nullable: true
+              - column:
+                  name: bstar
+                  type: double precision
+                  constraints:
+                    nullable: true
+              - column:
+                  name: mean_motion_dot
+                  type: double precision
+                  constraints:
+                    nullable: true
+              - column:
+                  name: mean_motion_ddot
+                  type: double precision
+                  constraints:
+                    nullable: true
+              - column:
+                  name: visible
+                  type: boolean
+                  constraints:
+                    nullable: true
+              - column:
+                  name: tle_line_1
+                  type: text
+                  constraints:
+                    nullable: true
+              - column:
+                  name: tle_line_2
+                  type: text
+                  constraints:
+                    nullable: true
+      rollback:
+        - dropTable:
+            tableName: space_stations

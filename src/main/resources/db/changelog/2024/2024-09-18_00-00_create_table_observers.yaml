@@ -1,0 +1,43 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: sterkhovkv
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: observers
+      changes:
+        - createTable:
+            tableName: observers
+            columns:
+              - column:
+                  name: id
+                  type: INTEGER
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: latitude
+                  type: DOUBLE
+                  constraints:
+                    nullable: true
+              - column:
+                  name: longitude
+                  type: DOUBLE
+                  constraints:
+                    nullable: true
+              - column:
+                  name: last_updated
+                  type: timestamp
+                  constraints:
+                    nullable: true
+      rollback:
+        - dropTable:
+            tableName: observers

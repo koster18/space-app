@@ -1,0 +1,47 @@
+application:
+  version: @project.version@
+
+spring:
+  application:
+    name: space-app
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/space-app-db
+    username: postgres
+    password: postgres
+    #        ??? ??????? ? ?????????? ???????????? ???? url, username, password
+    #url: jdbc:postgresql://space-app-db:5441/space-app-db
+    #username: space-app-db-user
+    #password: space-app-db-pass
+    driver-class-name: org.postgresql.Driver
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    enabled: true
+
+server:
+  port: 8282
+
+starcatalog:
+  filepathstars: "src/main/resources/catalogs/hipparcos_6_concise.js"
+  filepathconstellations: "src/main/resources/catalogs/constellation_lines"
+
+yandex:
+  geocoder:
+    api:
+      baseUrl: "https://geocode-maps.yandex.ru"
+      url: "https://geocode-maps.yandex.ru/1.x"
+      key: ""
+      #extendedParams: "&format=json&lang=ru_RU"
+      extendedParams: "&format=json&results=1&lang=ru_RU"
+
+
+celestrak:
+  api:
+    baseUrl: "https://celestrak.org"
+    url: "https://celestrak.org/NORAD/elements/gp.php"
+    urlStations: "https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=json"
+    urlStationsTLE: "https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=tle"
+    urlSatellites: "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=json"
+    urlSatellitesTLE: "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle"
+    urlTLEISS: "https://celestrak.org/NORAD/elements/gp.php?CATNR=25544&FORMAT=TLE"

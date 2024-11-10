@@ -1,0 +1,32 @@
+services:
+  space-app-db:
+    container_name: space-app-db
+    image: "postgres:9.6"
+    restart: always
+    ports:
+      - "5441:5441"
+    environment:
+      POSTGRES_DB: space-app-db
+      POSTGRES_USER: space-app-db-user
+      POSTGRES_PASSWORD: space-app-db-pass
+    command: ["postgres", "-c", "port=5441"]
+    volumes:
+      - space-app-db-data:/var/lib/postgresql/data/space-app
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -h localhost -p 5441 -U space-app-db-user -d space-app-db" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  space-app:
+    build: .
+    container_name: space-app
+    image: space-app:latest
+    restart: always
+    ports:
+      - "8282:8282"
+    depends_on:
+      space-app-db:
+        condition: service_healthy
+volumes:
+  space-app-db-data:

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>TLE для ISS</title>
+</head>
+<body>
+<h1>TLE для ISS</h1>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>Строка</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="line : ${tleList}">
+        <td th:text="${line}"></td>
+    </tr>
+    </tbody>
+</table>
+
+<a href="/">На главную</a>
+</body>
+</html>
