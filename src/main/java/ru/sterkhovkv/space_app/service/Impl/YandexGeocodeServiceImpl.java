@@ -1,17 +1,19 @@
-package ru.sterkhovkv.space_app.service;
+package ru.sterkhovkv.space_app.service.Impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ru.sterkhovkv.space_app.dto.EarthPositionCoordinates;
+import ru.sterkhovkv.space_app.exception.WebRequestException;
+import ru.sterkhovkv.space_app.service.GeocodeService;
+import ru.sterkhovkv.space_app.service.external.WebClientService;
 
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class YandexGeocodeServiceImpl implements GeocodeService {
     @Value("${yandex.geocoder.api.key}")
@@ -23,33 +25,23 @@ public class YandexGeocodeServiceImpl implements GeocodeService {
     @Value("${yandex.geocoder.api.extendedParams}")
     private String extendedParams;
 
-    private final WebClient webClient;
+    private final WebClientService webClientService;
     private final ObjectMapper objectMapper;
 
-    @Autowired
-    public YandexGeocodeServiceImpl(WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
-        this.webClient = webClientBuilder.baseUrl(baseUrl).build();
-        this.objectMapper = objectMapper;
-    }
-
     @Override
-    public Mono<EarthPositionCoordinates> getCoordinates(String address) {
+    public EarthPositionCoordinates getCoordinates(String address) {
+        String requestUrl = apiUrl + "?apikey=" + apiKey + "&geocode=" + address + extendedParams;
         try {
-            String requestUrl = apiUrl + "?apikey=" + apiKey + "&geocode=" + address + extendedParams;
-
-            Mono<EarthPositionCoordinates> coordinates = webClient.get()
-                    .uri(requestUrl)
-                    .retrieve()
-                    .bodyToMono(String.class)
+            return webClientService.get(requestUrl, String.class)
                     .map(this::extractCoordinates)
                     .onErrorResume(e -> {
-                        log.error("Error in getCoordinates webClient: {}", e.getMessage());
-                        return Mono.just(new EarthPositionCoordinates(200, 200)); // Возвращаем координаты по умолчанию
-                    });
-
-            return coordinates;
+                        log.error("Error in getCoordinates webClientService: {}", e.getMessage());
+                        throw new WebRequestException("Ошибка при выполнении запроса: " + e.getMessage());
+                    })
+                    .block();
         } catch (Exception e) {
-            return Mono.error(e);
+            log.error("Error in getCoordinates: {}", e.getMessage());
+            throw new WebRequestException("Ошибка при выполнении запроса: " + e.getMessage());
         }
     }
 
@@ -64,7 +56,7 @@ public class YandexGeocodeServiceImpl implements GeocodeService {
                     .path("found");
             int found = Integer.parseInt(foundNode.asText());
             if (found < 1) {
-                return null;
+                throw new WebRequestException("Координаты не получены в ответе сервиса");
             }
 
             JsonNode posNode = rootNode.path("response")
@@ -84,7 +76,7 @@ public class YandexGeocodeServiceImpl implements GeocodeService {
             return new EarthPositionCoordinates(latitude, longitude);
         } catch (Exception e) {
             log.error("Error in extractCoordinates: {}", e.getMessage());
-            return new EarthPositionCoordinates(200, 200);
+            throw new WebRequestException("Ошибка извлечения координат: " + e.getMessage());
         }
     }
 }

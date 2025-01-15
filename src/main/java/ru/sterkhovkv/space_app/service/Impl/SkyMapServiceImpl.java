@@ -1,4 +1,4 @@
-package ru.sterkhovkv.space_app.service;
+package ru.sterkhovkv.space_app.service.Impl;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,6 +14,11 @@ import ru.sterkhovkv.space_app.dto.StarCatalogDTO;
 import ru.sterkhovkv.space_app.dto.StarMapDTO;
 import ru.sterkhovkv.space_app.model.Satellite;
 import ru.sterkhovkv.space_app.model.SpaceStation;
+import ru.sterkhovkv.space_app.service.ObserverService;
+import ru.sterkhovkv.space_app.service.SatelliteDBService;
+import ru.sterkhovkv.space_app.service.SkyMapService;
+import ru.sterkhovkv.space_app.service.SpaceStationDBService;
+import ru.sterkhovkv.space_app.service.StarCatalogLoader;
 import ru.sterkhovkv.space_app.util.Constants;
 import ru.sterkhovkv.space_app.util.SkyCoordinatesTranslator;
 

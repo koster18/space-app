@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: space-app-db-pass
     command: ["postgres", "-c", "port=5441"]
     volumes:
-      - space-app-db-data:/var/lib/postgresql/data/space-app
+      - space-app-db-data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -h localhost -p 5441 -U space-app-db-user -d space-app-db" ]
       interval: 10s

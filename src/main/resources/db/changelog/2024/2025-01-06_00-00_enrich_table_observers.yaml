@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: 4
+      author: sterkhovkv
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: observers
+      changes:
+        - insert:
+            tableName: observers
+            columns:
+              - column:
+                  name: name
+                  value: "Observer"
+              - column:
+                  name: latitude
+                  value: 56.8529
+              - column:
+                  name: longitude
+                  value: 53.2112
+              - column:
+                  name: last_updated
+                  value: "now()"
+      rollback:
+        - delete:
+            tableName: observers
+            where: 'name = "Observer"'

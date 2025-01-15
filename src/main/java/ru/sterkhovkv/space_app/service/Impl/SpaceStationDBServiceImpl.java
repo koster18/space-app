@@ -1,4 +1,4 @@
-package ru.sterkhovkv.space_app.service;
+package ru.sterkhovkv.space_app.service.Impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +8,8 @@ import reactor.core.scheduler.Schedulers;
 import ru.sterkhovkv.space_app.dto.SatelliteDataDTO;
 import ru.sterkhovkv.space_app.model.SpaceStation;
 import ru.sterkhovkv.space_app.repository.SpaceStationRepository;
+import ru.sterkhovkv.space_app.service.SatelliteService;
+import ru.sterkhovkv.space_app.service.SpaceStationDBService;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;

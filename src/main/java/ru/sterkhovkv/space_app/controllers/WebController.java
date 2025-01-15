@@ -13,20 +13,16 @@ import ru.sterkhovkv.space_app.dto.SatelliteTLEDTO;
 import ru.sterkhovkv.space_app.dto.SkyHorizontalCoordinates;
 import ru.sterkhovkv.space_app.dto.SkyEquatorialCoordinates;
 import ru.sterkhovkv.space_app.model.Satellite;
-import ru.sterkhovkv.space_app.service.CelestrakSatelliteServiceImpl;
 import ru.sterkhovkv.space_app.service.GeocodeService;
 import ru.sterkhovkv.space_app.service.ObserverService;
 import ru.sterkhovkv.space_app.service.SatelliteService;
 import ru.sterkhovkv.space_app.sgp4.TLE;
 import ru.sterkhovkv.space_app.util.SkyCoordinatesTranslator;
 import ru.sterkhovkv.space_app.service.SkyMapService;
-import ru.sterkhovkv.space_app.service.StarCatalogLoaderImpl;
-import ru.sterkhovkv.space_app.service.YandexGeocodeServiceImpl;
+import ru.sterkhovkv.space_app.service.Impl.StarCatalogLoaderImpl;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -53,25 +49,39 @@ public class WebController {
     @PostMapping("/getCoordinates")
     public Mono<String> getCoordinates(@RequestParam String address,
                                        Model model) {
-        return geocodeService.getCoordinates(address)
-                .doOnNext(coordinates -> {
-                    observerService.setObserverPosition(coordinates);
-                    model.addAttribute("coordinates", coordinates);
-//                    SkyHorizontalCoordinates skyCoordinates = calculatePolarStar(coordinates);
-//                    model.addAttribute("skyCoordinates", skyCoordinates);
-                    if ((coordinates.getLat() == 0) && coordinates.getLon() == 0) {
-                        model.addAttribute("error", "Получены некорректные координаты");
-//                    } else {
-//                        // Добавляем azimuth и altitude в модель
-//                        model.addAttribute("skyCoordinates.az", skyCoordinates.getAz());
-//                        model.addAttribute("skyCoordinates.alt", skyCoordinates.getAlt());
-                    }
-                })
-                .doOnError(error -> {
-                    error.printStackTrace();
-                    model.addAttribute("error", "Не удалось получить координаты");
-                })
-                .then(Mono.just("index"));
+        try {
+            EarthPositionCoordinates coordinates = geocodeService.getCoordinates(address);
+            observerService.setObserverPosition(coordinates);
+            model.addAttribute("coordinates", coordinates);
+            if ((coordinates.getLat() == 0) && coordinates.getLon() == 0) {
+                model.addAttribute("error", "Получены некорректные координаты");
+            }
+        } catch (Exception e) {
+            model.addAttribute("error", "Не удалось получить координаты, ошибка: " + e.getMessage());
+        }
+        return Mono.just("index");
+
+
+//
+//        return geocodeService.getCoordinates(address)
+//                .doOnNext(coordinates -> {
+//                    observerService.setObserverPosition(coordinates);
+//                    model.addAttribute("coordinates", coordinates);
+////                    SkyHorizontalCoordinates skyCoordinates = calculatePolarStar(coordinates);
+////                    model.addAttribute("skyCoordinates", skyCoordinates);
+//                    if ((coordinates.getLat() == 0) && coordinates.getLon() == 0) {
+//                        model.addAttribute("error", "Получены некорректные координаты");
+////                    } else {
+////                        // Добавляем azimuth и altitude в модель
+////                        model.addAttribute("skyCoordinates.az", skyCoordinates.getAz());
+////                        model.addAttribute("skyCoordinates.alt", skyCoordinates.getAlt());
+//                    }
+//                })
+//                .doOnError(error -> {
+//                    error.printStackTrace();
+//                    model.addAttribute("error", "Не удалось получить координаты");
+//                })
+//                .then(Mono.just("index"));
     }
 
     @GetMapping("/calculate")
@@ -149,7 +159,7 @@ public class WebController {
 
         //List<SatelliteTLEDTO> satelliteTLEDTOS = satelliteService.getSpaceStationsTLE().collectList().block();
         Satellite s = Satellite.fromTLE(tleData);
-        log.info("Satellite: {}",s.toString());
+        log.info("Satellite: {}", s.toString());
 
         model.addAttribute("tleList", List.of(tleData.getName(), tleData.getLine1(), tleData.getLine2()));
         return "ISSForm";

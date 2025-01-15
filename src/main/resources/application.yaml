@@ -1,23 +1,21 @@
 application:
   version: @project.version@
-
 spring:
   application:
     name: space-app
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/space-app-db
-    username: postgres
-    password: postgres
-    #        ??? ??????? ? ?????????? ???????????? ???? url, username, password
-    #url: jdbc:postgresql://space-app-db:5441/space-app-db
-    #username: space-app-db-user
-    #password: space-app-db-pass
+    url: jdbc:postgresql://space-app-db:5441/space-app-db
+    username: space-app-db-user
+    password: space-app-db-pass
     driver-class-name: org.postgresql.Driver
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
     enabled: true
+
+  profiles:
+    active: dev
 
 server:
   port: 8282
@@ -35,6 +33,12 @@ yandex:
       #extendedParams: "&format=json&lang=ru_RU"
       extendedParams: "&format=json&results=1&lang=ru_RU"
 
+openstreetmap:
+  geocoder:
+    api:
+      baseUrl: "https://nominatim.openstreetmap.org"
+      url: "https://nominatim.openstreetmap.org/search?q="
+      extendedParams: "&format=json&addressdetails=0&limit=1"
 
 celestrak:
   api:

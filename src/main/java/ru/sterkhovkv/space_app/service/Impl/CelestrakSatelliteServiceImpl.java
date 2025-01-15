@@ -1,4 +1,4 @@
-package ru.sterkhovkv.space_app.service;
+package ru.sterkhovkv.space_app.service.Impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +10,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.sterkhovkv.space_app.dto.SatelliteDataDTO;
 import ru.sterkhovkv.space_app.dto.SatelliteTLEDTO;
+import ru.sterkhovkv.space_app.service.SatelliteService;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Service

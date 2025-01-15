@@ -1,4 +1,4 @@
-package ru.sterkhovkv.space_app.service;
+package ru.sterkhovkv.space_app.service.Impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +9,8 @@ import ru.sterkhovkv.space_app.dto.SkyEquatorialCoordinates;
 import ru.sterkhovkv.space_app.dto.SkyHorizontalCoordinates;
 import ru.sterkhovkv.space_app.model.Satellite;
 import ru.sterkhovkv.space_app.model.SpaceStation;
+import ru.sterkhovkv.space_app.service.SpaceStationConfigurationService;
+import ru.sterkhovkv.space_app.service.SpaceStationDBService;
 import ru.sterkhovkv.space_app.util.SkyCoordinatesTranslator;
 
 import java.time.ZonedDateTime;
