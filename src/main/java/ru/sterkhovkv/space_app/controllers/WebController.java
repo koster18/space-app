@@ -12,7 +12,8 @@ import ru.sterkhovkv.space_app.dto.EarthPositionCoordinates;
 import ru.sterkhovkv.space_app.dto.SatelliteTLEDTO;
 import ru.sterkhovkv.space_app.dto.SkyHorizontalCoordinates;
 import ru.sterkhovkv.space_app.dto.SkyEquatorialCoordinates;
-import ru.sterkhovkv.space_app.model.Satellite;
+import ru.sterkhovkv.space_app.mapper.SpaceObjectMapper;
+import ru.sterkhovkv.space_app.model.SpaceObject;
 import ru.sterkhovkv.space_app.service.GeocodeService;
 import ru.sterkhovkv.space_app.service.ObserverService;
 import ru.sterkhovkv.space_app.service.SatelliteService;
@@ -34,8 +35,7 @@ public class WebController {
     private final GeocodeService geocodeService;
     private final ObserverService observerService;
     private final SatelliteService satelliteService;
-    private final SkyMapService skyMapService;
-    private final StarCatalogLoaderImpl starCatalogLoader;
+    private final SpaceObjectMapper spaceObjectMapper;
 
     @GetMapping("/")
     public String index(Model model) {
@@ -158,7 +158,7 @@ public class WebController {
 //        }
 
         //List<SatelliteTLEDTO> satelliteTLEDTOS = satelliteService.getSpaceStationsTLE().collectList().block();
-        Satellite s = Satellite.fromTLE(tleData);
+        SpaceObject s = spaceObjectMapper.spaceObjectFromTLE(tleData);
         log.info("Satellite: {}", s.toString());
 
         model.addAttribute("tleList", List.of(tleData.getName(), tleData.getLine1(), tleData.getLine2()));

@@ -5,8 +5,7 @@ import ru.sterkhovkv.space_app.dto.EarthPositionCoordinates;
 import ru.sterkhovkv.space_app.dto.RectangularCoordinates;
 import ru.sterkhovkv.space_app.dto.SkyHorizontalCoordinates;
 import ru.sterkhovkv.space_app.dto.SkyEquatorialCoordinates;
-import ru.sterkhovkv.space_app.model.Satellite;
-import ru.sterkhovkv.space_app.model.SpaceStation;
+import ru.sterkhovkv.space_app.model.SpaceObject;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -111,7 +110,7 @@ public class SkyCoordinatesTranslator {
     // Return RectangularCoordinates [x, y, z] position of Satellite in km
     // in TEME coordinate system by calculating its orbit in kepler constants
     public static RectangularCoordinates calculateSatelliteCoordinates(
-            Satellite satelliteData,
+            SpaceObject satelliteData,
             ZonedDateTime zonedDateTimeUTC) {
 
         // Получаем Кеплеровы элементы орбиты
@@ -192,7 +191,7 @@ public class SkyCoordinatesTranslator {
     // Return SkyEquatorialCoordinates [Ra, Dec] as it will be visible
     // from observer position for satellite in given time
     public static SkyEquatorialCoordinates calculateEquatorialCoordinates(
-            Satellite satelliteData,
+            SpaceObject satelliteData,
             EarthPositionCoordinates observerCoordinates,
             ZonedDateTime zonedDateTimeUTC) {
 

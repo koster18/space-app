@@ -94,12 +94,17 @@ databaseChangeLog:
                   constraints:
                     nullable: true
               - column:
-                  name: tle_line_1
+                  name: space_station
+                  type: boolean
+                  constraints:
+                    nullable: true
+              - column:
+                  name: tle_line1
                   type: text
                   constraints:
                     nullable: true
               - column:
-                  name: tle_line_2
+                  name: tle_line2
                   type: text
                   constraints:
                     nullable: true

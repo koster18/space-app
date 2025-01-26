@@ -9,8 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.sterkhovkv.space_app.dto.EarthPositionCoordinates;
 import ru.sterkhovkv.space_app.service.ObserverService;
-import ru.sterkhovkv.space_app.service.SatelliteDBService;
-import ru.sterkhovkv.space_app.service.SpaceStationDBService;
+import ru.sterkhovkv.space_app.service.SpaceObjectDataService;
 import ru.sterkhovkv.space_app.util.SkyCoordinatesTranslator;
 import ru.sterkhovkv.space_app.service.SkyMapService;
 import ru.sterkhovkv.space_app.service.GeocodeService;
@@ -30,8 +29,7 @@ public class SkyMapController {
     private final GeocodeService geocodeService;
     private final ObserverService observerService;
     private final SkyMapService skyMapService;
-    private final SatelliteDBService satelliteDBService;
-    private final SpaceStationDBService spaceStationDBService;
+    private final SpaceObjectDataService spaceObjectDataService;
 
     private final List<Integer> offsets;
     private Boolean drawStars;
@@ -43,13 +41,11 @@ public class SkyMapController {
     public SkyMapController(GeocodeService geocodeService,
                             ObserverService observerService,
                             SkyMapService skyMapService,
-                            SatelliteDBService satelliteDBService,
-                            SpaceStationDBService spaceStationDBService) {
+                            SpaceObjectDataService spaceObjectDataService) {
         this.geocodeService = geocodeService;
         this.observerService = observerService;
         this.skyMapService = skyMapService;
-        this.satelliteDBService = satelliteDBService;
-        this.spaceStationDBService = spaceStationDBService;
+        this.spaceObjectDataService = spaceObjectDataService;
 
         this.offsets = new ArrayList<>();
         for (int i = -12; i <= 12; i++) {
@@ -106,9 +102,9 @@ public class SkyMapController {
 //                        }).block();
             } else model.addAttribute("error", "Введите адрес");
         } else if ("updateSatellites".equals(action)) {
-            spaceStationDBService.saveSpaceStationsToDB();
+            spaceObjectDataService.saveSpaceObjectsToDB(true);
         } else if ("updateSmallSatellites".equals(action)) {
-            satelliteDBService.saveSatellitesToDB();
+            spaceObjectDataService.saveSpaceObjectsToDB(false);
         }
         drawStars = params.containsKey("showStars");
         drawConstellationLines = params.containsKey("showConstellationLines");

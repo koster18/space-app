@@ -2,22 +2,19 @@ package ru.sterkhovkv.space_app.service.Impl;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.sterkhovkv.space_app.dto.ConstellationDTO;
 import ru.sterkhovkv.space_app.dto.EarthPositionCoordinates;
 import ru.sterkhovkv.space_app.dto.SatelliteMapDTO;
-import ru.sterkhovkv.space_app.dto.SkyEquatorialCoordinates;
 import ru.sterkhovkv.space_app.dto.SkyHorizontalCoordinates;
 import ru.sterkhovkv.space_app.dto.StarCatalogDTO;
 import ru.sterkhovkv.space_app.dto.StarMapDTO;
-import ru.sterkhovkv.space_app.model.Satellite;
-import ru.sterkhovkv.space_app.model.SpaceStation;
 import ru.sterkhovkv.space_app.service.ObserverService;
-import ru.sterkhovkv.space_app.service.SatelliteDBService;
 import ru.sterkhovkv.space_app.service.SkyMapService;
-import ru.sterkhovkv.space_app.service.SpaceStationDBService;
+import ru.sterkhovkv.space_app.service.SpaceObjectCoordinatesService;
+import ru.sterkhovkv.space_app.service.SpaceObjectDataService;
 import ru.sterkhovkv.space_app.service.StarCatalogLoader;
 import ru.sterkhovkv.space_app.util.Constants;
 import ru.sterkhovkv.space_app.util.SkyCoordinatesTranslator;
@@ -34,35 +31,18 @@ import java.util.List;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class SkyMapServiceImpl implements SkyMapService {
 
     private final StarCatalogLoader starCatalogLoader;
     private final ObserverService observerService;
-    private final SatelliteDBService satelliteDBService;
-    private final SpaceStationDBService spaceStationDBService;
+    private final SpaceObjectCoordinatesService spaceObjectCoordinatesService;
 
-    private final int width;
-    private final int height;
-    private final int radius;
-    private final int centerX;
-    private final int centerY;
-
-    @Autowired
-    public SkyMapServiceImpl(StarCatalogLoader starCatalogLoader,
-                             ObserverService observerService,
-                             SatelliteDBService satelliteDBService,
-                             SpaceStationDBService spaceStationDBService) {
-        this.starCatalogLoader = starCatalogLoader;
-        this.observerService = observerService;
-        this.satelliteDBService = satelliteDBService;
-        this.spaceStationDBService = spaceStationDBService;
-
-        this.width = Constants.SKY_MAP_WIDTH;
-        this.height = Constants.SKY_MAP_HEIGHT;
-        this.radius = (height / 2 - Constants.MAP_LINES_OFFSET);
-        this.centerX = width / 2;
-        this.centerY = height / 2;
-    }
+    private final int width = Constants.SKY_MAP_WIDTH;
+    private final int height = Constants.SKY_MAP_HEIGHT;
+    private final int radius = (height / 2 - Constants.MAP_LINES_OFFSET);
+    private final int centerX = width / 2;
+    private final int centerY = height / 2;
 
     //coordinates.az = [0; 360]
     //coordinates.alt = [0; 90]
@@ -86,7 +66,7 @@ public class SkyMapServiceImpl implements SkyMapService {
     }
 
 
-    public BufferedImage createSkyMap(ZonedDateTime dateTime,
+    private BufferedImage createSkyMap(ZonedDateTime dateTime,
                                       boolean showStars,
                                       boolean showConstellationLines,
                                       boolean showSpaceStations,
@@ -328,7 +308,7 @@ public class SkyMapServiceImpl implements SkyMapService {
         return constellationLines;
     }
 
-    public List<StarMapDTO> calculateStarPositions(EarthPositionCoordinates coordinates, ZonedDateTime dateTime) {
+    private List<StarMapDTO> calculateStarPositions(EarthPositionCoordinates coordinates, ZonedDateTime dateTime) {
 
         List<StarCatalogDTO> starsFromFile = starCatalogLoader.loadStarsFromFile();
         List<StarMapDTO> stars = new ArrayList<>();
@@ -356,52 +336,11 @@ public class SkyMapServiceImpl implements SkyMapService {
         double endLineAlt;
     }
 
-    public List<SatelliteMapDTO> calculateSpaceStationsCoordinates(EarthPositionCoordinates position, ZonedDateTime dateTime) {
-        List<SatelliteMapDTO> satelliteCoordinates = new ArrayList<>();
-
-        List<SpaceStation> spaceStations = spaceStationDBService.getVisibleSpaceStationsFromDB();
-        if (!spaceStations.isEmpty()) {
-            for (SpaceStation spaceStation : spaceStations) {
-                SkyEquatorialCoordinates equatorialCoordinates = SkyCoordinatesTranslator.calculateEquatorialCoordinates(
-                        Satellite.fromSpaceStation(spaceStation), position, dateTime);
-                SkyHorizontalCoordinates horizontalCoordinates = SkyCoordinatesTranslator.calculateSkyHorizontalCoordinates(
-                        equatorialCoordinates, position, dateTime);
-                SatelliteMapDTO satelliteMapDTO = new SatelliteMapDTO();
-                satelliteMapDTO.setCoordinates(horizontalCoordinates);
-                satelliteMapDTO.setObjectId(spaceStation.getNoradCatId());
-                satelliteMapDTO.setObjectName(spaceStation.getObjectName());
-                satelliteMapDTO.setVisible(spaceStation.getVisible());
-                if (satelliteMapDTO.getVisible() && (horizontalCoordinates.getAlt() > 0)) satelliteCoordinates.add(satelliteMapDTO);
-//                if (satellite.getObjectName().equals("ISS (ZARYA)")) {
-//                    log.info("Equatorial MKS: {}", equatorialCoordinates);
-//                    log.info("Horizontal MKS: {}", horizontalCoordinates);
-//                    log.info("Rect MKS: {}", SkyCoordinatesTranslator.calculateSatelliteCoordinates(satellite, dateTime));
-//                    log.info("Siderial Time: {}", SkyCoordinatesTranslator.calculateUTCSiderealTime(dateTime, position.getLon()));
-//                }
-            }
-        } else log.info("Satellites DB empty");
-        return satelliteCoordinates;
+    private List<SatelliteMapDTO> calculateSpaceStationsCoordinates(EarthPositionCoordinates position, ZonedDateTime dateTime) {
+        return spaceObjectCoordinatesService.getVisibleSpaceObjectsList(position, dateTime, true);
     }
 
-
-    public List<SatelliteMapDTO> calculateSmallSatelliteCoordinates(EarthPositionCoordinates position, ZonedDateTime dateTime) {
-        List<SatelliteMapDTO> satelliteCoordinates = new ArrayList<>();
-
-        List<Satellite> satellites = satelliteDBService.getSatellitesFromDB();
-        if (!satellites.isEmpty()) {
-            for (Satellite satellite : satellites) {
-                SkyEquatorialCoordinates equatorialCoordinates = SkyCoordinatesTranslator.calculateEquatorialCoordinates(
-                        satellite, position, dateTime);
-                SkyHorizontalCoordinates horizontalCoordinates = SkyCoordinatesTranslator.calculateSkyHorizontalCoordinates(
-                        equatorialCoordinates, position, dateTime);
-                SatelliteMapDTO satelliteMapDTO = new SatelliteMapDTO();
-                satelliteMapDTO.setCoordinates(horizontalCoordinates);
-                satelliteMapDTO.setObjectId(satellite.getNoradCatId());
-                satelliteMapDTO.setObjectName(satellite.getObjectName());
-                satelliteMapDTO.setVisible(satellite.getVisible());
-                if (satelliteMapDTO.getVisible() && (horizontalCoordinates.getAlt() > 0)) satelliteCoordinates.add(satelliteMapDTO);
-            }
-        } else log.info("Satellites DB empty");
-        return satelliteCoordinates;
+    private List<SatelliteMapDTO> calculateSmallSatelliteCoordinates(EarthPositionCoordinates position, ZonedDateTime dateTime) {
+        return spaceObjectCoordinatesService.getVisibleSpaceObjectsList(position, dateTime, false);
     }
 }
