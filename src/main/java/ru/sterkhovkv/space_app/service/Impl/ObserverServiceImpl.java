@@ -1,4 +1,4 @@
-package ru.sterkhovkv.space_app.service;
+package ru.sterkhovkv.space_app.service.Impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.sterkhovkv.space_app.dto.EarthPositionCoordinates;
 import ru.sterkhovkv.space_app.model.Observer;
 import ru.sterkhovkv.space_app.repository.ObserverRepository;
+import ru.sterkhovkv.space_app.service.ObserverService;
 import ru.sterkhovkv.space_app.util.Constants;
 
 import java.time.ZoneId;

@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5441/space-app-db
+
+logging:
+  level:
+    org.springframework: info
+    ru.sterkhovkv.space_app: debug

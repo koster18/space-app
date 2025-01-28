@@ -1,4 +1,4 @@
-package ru.sterkhovkv.space_app.service;
+package ru.sterkhovkv.space_app.service.Impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.sterkhovkv.space_app.dto.ConstellationDTO;
 import ru.sterkhovkv.space_app.dto.SkyEquatorialCoordinates;
 import ru.sterkhovkv.space_app.dto.StarCatalogDTO;
+import ru.sterkhovkv.space_app.service.StarCatalogLoader;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

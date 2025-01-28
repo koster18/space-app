@@ -1,7 +1,7 @@
 package ru.sterkhovkv.space_app.controllers;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.sterkhovkv.space_app.dto.SatelliteMapDTO;
 import ru.sterkhovkv.space_app.service.ObserverService;
-import ru.sterkhovkv.space_app.service.SatelliteConfigurationService;
-import ru.sterkhovkv.space_app.service.SpaceStationConfigurationService;
+import ru.sterkhovkv.space_app.service.SpaceObjectCoordinatesService;
+import ru.sterkhovkv.space_app.service.SpaceObjectDataService;
 
 import java.time.ZonedDateTime;
 import java.time.ZoneId;
@@ -18,27 +18,20 @@ import java.util.List;
 import java.util.Map;
 
 
-@Controller
 @Slf4j
+@Controller
+@RequiredArgsConstructor
 public class SatelliteController {
-    private final SatelliteConfigurationService satelliteConfigurationService;
-    private final SpaceStationConfigurationService spaceStationConfigurationService;
+    private final SpaceObjectCoordinatesService spaceObjectConfigurationService;
+    private final SpaceObjectDataService spaceObjectDataService;
     private final ObserverService observerService;
-
-    @Autowired
-    public SatelliteController(SatelliteConfigurationService satelliteConfigurationService,
-                               SpaceStationConfigurationService spaceStationConfigurationService,
-                               ObserverService observerService) {
-        this.satelliteConfigurationService = satelliteConfigurationService;
-        this.spaceStationConfigurationService = spaceStationConfigurationService;
-        this.observerService = observerService;
-    }
 
     @GetMapping("/satellites")
     public String getSatellites(Model model) {
-        model.addAttribute("satellites", satelliteConfigurationService.getSatelliteList(
+        model.addAttribute("satellites", spaceObjectConfigurationService.getSpaceObjectsList(
                 observerService.getObserverPosition(),
-                ZonedDateTime.now(ZoneId.of("UTC"))
+                ZonedDateTime.now(ZoneId.of("UTC")),
+                false
         ));
         return "satellites";
     }
@@ -47,16 +40,19 @@ public class SatelliteController {
     public String postSatellites(@RequestParam Map<String, String> params, Model model) {
         String action = params.get("action");
         if (action.equals("update")) {
-            List<SatelliteMapDTO> satelliteList = satelliteConfigurationService.updateSatelliteList(
+            spaceObjectConfigurationService.loadSpaceObjectsToCache(false);
+            List<SatelliteMapDTO> satelliteList = spaceObjectConfigurationService.getSpaceObjectsList(
                     observerService.getObserverPosition(),
-                    ZonedDateTime.now(ZoneId.of("UTC"))
+                    ZonedDateTime.now(ZoneId.of("UTC")),
+                    false
             );
             model.addAttribute("satellites", satelliteList);
             return "satellites";
         } else if (action.equals("save")) {
-            List<SatelliteMapDTO> satelliteList = satelliteConfigurationService.getSatelliteList(
+            List<SatelliteMapDTO> satelliteList = spaceObjectConfigurationService.getSpaceObjectsList(
                     observerService.getObserverPosition(),
-                    ZonedDateTime.now(ZoneId.of("UTC"))
+                    ZonedDateTime.now(ZoneId.of("UTC")),
+                    false
             );
             for (int i = 0; i < satelliteList.size(); i++) {
                 if (!params.containsKey("visible" + i)) {
@@ -65,11 +61,12 @@ public class SatelliteController {
                     satelliteList.get(i).setVisible(true);
                 }
             }
-            if (satelliteConfigurationService.saveSatelliteProperties(satelliteList)) {
+            if (spaceObjectDataService.saveSpaceObjectsProperties(satelliteList)) {
                 model.addAttribute("success", "Успешно сохранено");
             } else {
                 model.addAttribute("error", "Ошибка сохранения");
             }
+            model.addAttribute("satellites", satelliteList);
         }
 
         return "redirect:/satellites";
@@ -77,9 +74,10 @@ public class SatelliteController {
 
     @GetMapping("/spacestations")
     public String getSpaceStations(Model model) {
-        model.addAttribute("satellites", spaceStationConfigurationService.getSpaceStationsList(
+        model.addAttribute("satellites", spaceObjectConfigurationService.getSpaceObjectsList(
                 observerService.getObserverPosition(),
-                ZonedDateTime.now(ZoneId.of("UTC"))
+                ZonedDateTime.now(ZoneId.of("UTC")),
+                true
         ));
         return "spacestations";
     }
@@ -88,16 +86,19 @@ public class SatelliteController {
     public String postSpaceStations(@RequestParam Map<String, String> params, Model model) {
         String action = params.get("action");
         if (action.equals("update")) {
-            List<SatelliteMapDTO> spaceStationList = spaceStationConfigurationService.updateSpaceStationsList(
+            spaceObjectConfigurationService.loadSpaceObjectsToCache(true);
+            List<SatelliteMapDTO> spaceStationList = spaceObjectConfigurationService.getSpaceObjectsList(
                     observerService.getObserverPosition(),
-                    ZonedDateTime.now(ZoneId.of("UTC"))
+                    ZonedDateTime.now(ZoneId.of("UTC")),
+                    true
             );
             model.addAttribute("satellites", spaceStationList);
             return "spacestations";
         } else if (action.equals("save")) {
-            List<SatelliteMapDTO> spaceStationList = spaceStationConfigurationService.getSpaceStationsList(
+            List<SatelliteMapDTO> spaceStationList = spaceObjectConfigurationService.getSpaceObjectsList(
                     observerService.getObserverPosition(),
-                    ZonedDateTime.now(ZoneId.of("UTC"))
+                    ZonedDateTime.now(ZoneId.of("UTC")),
+                    true
             );
             for (int i = 0; i < spaceStationList.size(); i++) {
                 if (!params.containsKey("visible" + i)) {
@@ -106,11 +107,12 @@ public class SatelliteController {
                     spaceStationList.get(i).setVisible(true);
                 }
             }
-            if (spaceStationConfigurationService.saveSpaceStationProperties(spaceStationList)) {
+            if (spaceObjectDataService.saveSpaceObjectsProperties(spaceStationList)) {
                 model.addAttribute("success", "Успешно сохранено");
             } else {
                 model.addAttribute("error", "Ошибка сохранения");
             }
+            model.addAttribute("satellites", spaceStationList);
         }
         return "redirect:/spacestations";
     }
