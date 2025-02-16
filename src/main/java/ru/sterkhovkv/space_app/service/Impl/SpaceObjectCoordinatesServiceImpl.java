@@ -77,6 +77,7 @@ public class SpaceObjectCoordinatesServiceImpl implements SpaceObjectCoordinates
         return spaceObjectCoordinates;
     }
 
+    @Override
     public void invalidateCache(boolean spaceStation) {
         if (spaceStation) {
             spaceStationCache.clear();

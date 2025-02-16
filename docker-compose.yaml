@@ -24,7 +24,7 @@ services:
     image: space-app:latest
     restart: always
     ports:
-      - "8282:8282"
+      - "8081:8081"
     depends_on:
       space-app-db:
         condition: service_healthy
