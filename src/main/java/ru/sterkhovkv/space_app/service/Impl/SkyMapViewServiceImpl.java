@@ -69,6 +69,15 @@ public class SkyMapViewServiceImpl implements SkyMapViewService {
         fillModel(model, nowUTC, Integer.parseInt(params.get("timeZone")), nowLocal);
     }
 
+    @Override
+    public String updateSkyMapImage(Map<String, String> params) {
+        updateDrawingPreferences(params);
+        ZonedDateTime nowLocal = parseDateTime(params);
+        ZonedDateTime nowUTC = nowLocal.withZoneSameInstant(ZoneId.of("UTC"));
+
+        return skyMapService.drawSkyMap(nowUTC, drawStars, drawConstellationLines, drawSatellites, drawSmallSatellites);
+    }
+
     private void updateSatellites(boolean isSmall) {
         spaceObjectDataService.saveSpaceObjectsToDB(isSmall);
     }

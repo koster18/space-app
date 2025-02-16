@@ -8,4 +8,6 @@ public interface SkyMapViewService {
     void handleGetSkyMap(Model model);
 
     void handleUpdateSkyMapActions(Map<String, String> params, Model model);
+
+    String updateSkyMapImage(Map<String, String> params);
 }
