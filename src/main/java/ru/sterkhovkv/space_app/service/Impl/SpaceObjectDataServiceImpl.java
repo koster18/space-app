@@ -40,7 +40,7 @@ public class SpaceObjectDataServiceImpl implements SpaceObjectDataService {
                 .publishOn(Schedulers.boundedElastic())
                 .doOnNext(satelliteData -> saveSpaceObject(satelliteData, spaceStation, count))
                 .doOnComplete(() -> {
-                    log.info("Saved {} {}", count.get(), spaceStation ? "space stations" : "satellites");
+                    log.info("Saved {} {}", count.get() + 1, spaceStation ? "space stations" : "satellites");
                     clearOldSpaceObjects();
                 })
                 .subscribe();

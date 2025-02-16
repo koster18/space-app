@@ -10,5 +10,5 @@ FROM eclipse-temurin:17-jdk-alpine
 ENV APP_HOME /app
 WORKDIR $APP_HOME
 COPY --from=build /app/target/*.jar $APP_HOME/space-app.jar
-EXPOSE 8282
+EXPOSE 8081
 ENTRYPOINT ["sh", "-c", "java -jar /app/space-app.jar"]

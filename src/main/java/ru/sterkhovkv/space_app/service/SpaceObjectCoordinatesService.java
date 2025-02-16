@@ -12,4 +12,6 @@ public interface SpaceObjectCoordinatesService {
     List<SatelliteMapDTO> getSpaceObjectsList(EarthPositionCoordinates position, ZonedDateTime dateTime, boolean spaceStation);
 
     List<SatelliteMapDTO> getVisibleSpaceObjectsList(EarthPositionCoordinates position, ZonedDateTime dateTime, boolean spaceStation);
+
+    void invalidateCache(boolean spaceStation);
 }

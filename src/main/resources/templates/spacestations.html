@@ -43,8 +43,8 @@
         <button type="submit" name="action" value="update">Обновить базу данных</button>
         <button type="submit" name="action" value="save">Сохранить изменения</button>
         <div>
-            <p th:text="${error}" style="color: red;"></p>
-            <p th:text="${success}" style="color: green;"></p>
+            <p th:text="${satelliteViewDTO.errorMessage}" style="color: red;"></p>
+            <p th:text="${satelliteViewDTO.successMessage}" style="color: green;"></p>
         </div>
         <table>
             <thead>
@@ -58,7 +58,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="satellite, iterStat : ${satellites}"
+            <tr th:each="satellite, iterStat : ${satelliteViewDTO.satellites}"
                 th:class="${satellite.coordinates.alt < 0} ? 'negative-alt' : 'positive-alt'">
                 <td th:text="${iterStat.count}"></td>
                 <td th:text="${satellite.objectName}"></td>
@@ -75,8 +75,8 @@
         <button type="submit" name="action" value="update">Обновить базу данных</button>
         <button type="submit" name="action" value="save">Сохранить изменения</button>
         <div>
-            <p th:text="${error}" style="color: red;"></p>
-            <p th:text="${success}" style="color: green;"></p>
+            <p th:text="${satelliteViewDTO.errorMessage}" style="color: red;"></p>
+            <p th:text="${satelliteViewDTO.successMessage}" style="color: green;"></p>
         </div>
     </form>
     <a href="/skymap">Вернуться на карту неба</a>

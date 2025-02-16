@@ -14,7 +14,6 @@ import ru.sterkhovkv.space_app.dto.StarMapDTO;
 import ru.sterkhovkv.space_app.service.ObserverService;
 import ru.sterkhovkv.space_app.service.SkyMapService;
 import ru.sterkhovkv.space_app.service.SpaceObjectCoordinatesService;
-import ru.sterkhovkv.space_app.service.SpaceObjectDataService;
 import ru.sterkhovkv.space_app.service.StarCatalogLoader;
 import ru.sterkhovkv.space_app.util.Constants;
 import ru.sterkhovkv.space_app.util.SkyCoordinatesTranslator;
@@ -44,6 +43,7 @@ public class SkyMapServiceImpl implements SkyMapService {
     private final int centerX = width / 2;
     private final int centerY = height / 2;
 
+    //Рабочие диапазоны
     //coordinates.az = [0; 360]
     //coordinates.alt = [0; 90]
 
@@ -60,7 +60,7 @@ public class SkyMapServiceImpl implements SkyMapService {
             byte[] imageBytes = baos.toByteArray();
             base64Image = "data:image/png;base64," + Base64.getEncoder().encodeToString(imageBytes);
         } catch (IOException e) {
-            e.printStackTrace();
+           log.error(e.getMessage());
         }
         return base64Image;
     }
@@ -109,7 +109,7 @@ public class SkyMapServiceImpl implements SkyMapService {
     private void drawGrid(Graphics2D g2d, int width, int height) {
         // Рисуем окружности для значений высоты (altitude)
         for (int i = 0; i <= 90; i += 10) {
-            int radius = (int) ((height / 2 - Constants.MAP_LINES_OFFSET) * (i / 90.0));
+            int radius = (int) ((height / 2.0 - Constants.MAP_LINES_OFFSET) * (i / 90.0));
             g2d.setColor(new Color(255, 255, 255, 50));
             g2d.drawOval((width / 2) - radius, (height / 2) - radius, radius * 2, radius * 2);
             g2d.drawString((90 - i) + "°", width / 2 + radius + 5, height / 2);

@@ -21,7 +21,7 @@ import java.time.ZonedDateTime;
 @Getter
 @Setter
 @Builder
-public final class SpaceObject {
+public class SpaceObject {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
