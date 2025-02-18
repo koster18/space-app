@@ -38,7 +38,9 @@ public class CelestrakSatelliteServiceImpl implements SatelliteService {
 
     @Autowired
     public CelestrakSatelliteServiceImpl(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl(baseUrl).build();
+        this.webClient = webClientBuilder.baseUrl(baseUrl)
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
+                .build();
     }
 
     @Override
@@ -128,7 +130,7 @@ public class CelestrakSatelliteServiceImpl implements SatelliteService {
 
         for (int i = 0; i < lines.length; i += 3) {
             if (i + 2 < lines.length) {
-                String name = lines[i].trim();
+                String name = lines[i].trim().replaceAll("\\s+$", "");
                 String line1 = lines[i + 1].trim();
                 String line2 = lines[i + 2].trim();
                 satellites.add(new SatelliteTLEDTO(name, line1, line2));

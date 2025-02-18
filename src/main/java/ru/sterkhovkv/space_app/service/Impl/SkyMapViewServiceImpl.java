@@ -5,10 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import ru.sterkhovkv.space_app.dto.EarthPositionCoordinates;
+import ru.sterkhovkv.space_app.enums.CalculationMode;
 import ru.sterkhovkv.space_app.service.GeocodeService;
 import ru.sterkhovkv.space_app.service.ObserverService;
 import ru.sterkhovkv.space_app.service.SkyMapService;
 import ru.sterkhovkv.space_app.service.SkyMapViewService;
+import ru.sterkhovkv.space_app.service.SpaceObjectCoordinatesService;
 import ru.sterkhovkv.space_app.service.SpaceObjectDataService;
 import ru.sterkhovkv.space_app.util.SkyCoordinatesTranslator;
 
@@ -30,17 +32,20 @@ public class SkyMapViewServiceImpl implements SkyMapViewService {
     private final ObserverService observerService;
     private final SpaceObjectDataService spaceObjectDataService;
     private final SkyMapService skyMapService;
+    private final SpaceObjectCoordinatesService spaceObjectCoordinatesService;
 
     private Boolean drawStars = true;
     private Boolean drawConstellationLines = true;
     private Boolean drawSatellites = true;
     private Boolean drawSmallSatellites = false;
+    private CalculationMode calculationMode = CalculationMode.KEPLER_NEWTON;
 
     @Override
     public void handleGetSkyMap(Model model) {
         ZonedDateTime nowUTC = ZonedDateTime.now(ZoneId.of("UTC"));
-        ZonedDateTime nowLocal = ZonedDateTime.now();
-        int zoneOffset = nowLocal.getOffset().getTotalSeconds() / 3600;
+        int zoneOffset = observerService.getTimeZone();
+        ZoneOffset offset = ZoneOffset.ofHours(zoneOffset);
+        ZonedDateTime nowLocal = nowUTC.withZoneSameInstant(offset);
 
         fillModel(model, nowUTC, zoneOffset, nowLocal);
     }
@@ -60,12 +65,13 @@ public class SkyMapViewServiceImpl implements SkyMapViewService {
                 updateSatellites(false);
                 break;
             default:
-                log.warn("Unknown action: {}", action);
+                break;
         }
 
         updateDrawingPreferences(params);
         ZonedDateTime nowLocal = parseDateTime(params);
         ZonedDateTime nowUTC = nowLocal.withZoneSameInstant(ZoneId.of("UTC"));
+        observerService.setTimeZone(Integer.parseInt(params.get("timeZone")));
         fillModel(model, nowUTC, Integer.parseInt(params.get("timeZone")), nowLocal);
     }
 
@@ -75,12 +81,21 @@ public class SkyMapViewServiceImpl implements SkyMapViewService {
         ZonedDateTime nowLocal = parseDateTime(params);
         ZonedDateTime nowUTC = nowLocal.withZoneSameInstant(ZoneId.of("UTC"));
 
-        return skyMapService.drawSkyMap(nowUTC, drawStars, drawConstellationLines, drawSatellites, drawSmallSatellites);
+        return skyMapService.drawSkyMap(nowUTC, drawStars, drawConstellationLines, drawSatellites, drawSmallSatellites, calculationMode);
     }
 
-    private void updateSatellites(boolean isSmall) {
-        spaceObjectDataService.saveSpaceObjectsToDB(isSmall);
+    private void updateSatellites(boolean spaceStation) {
+        spaceObjectDataService.saveTLESpaceObjectsToDB(spaceStation)
+                .doOnSuccess(aVoid -> {
+                    long startTime = System.currentTimeMillis();
+                    spaceObjectCoordinatesService.invalidateCache(spaceStation);
+                    spaceObjectCoordinatesService.loadSpaceObjectsToCache(spaceStation);
+                    log.info("Time wasted for {} cache refresh: {} ms", spaceStation ? "space stations" : "satellites",
+                            (System.currentTimeMillis() - startTime));
+                })
+                .subscribe();
     }
+
 
     public void handleGetCoordinates(String address, Model model) {
         if (address == null || address.trim().isEmpty()) {
@@ -101,6 +116,7 @@ public class SkyMapViewServiceImpl implements SkyMapViewService {
     }
 
     public void updateDrawingPreferences(Map<String, String> params) {
+        calculationMode = params.containsKey("calculationMode") ? CalculationMode.fromValue(params.get("calculationMode")) : CalculationMode.KEPLER_NEWTON;
         drawStars = params.containsKey("showStars");
         drawConstellationLines = params.containsKey("showConstellationLines");
         drawSatellites = params.containsKey("showSatellites");
@@ -142,11 +158,13 @@ public class SkyMapViewServiceImpl implements SkyMapViewService {
         model.addAttribute("currentSeconds", formatTime(nowLocal, "ss"));
         model.addAttribute("zoneOffset", zoneOffset);
         model.addAttribute("offsets", IntStream.rangeClosed(-12, 12).boxed().collect(Collectors.toList()));
+        model.addAttribute("calculationMode", calculationMode.getValue());
         model.addAttribute("showStars", drawStars);
         model.addAttribute("showConstellationLines", drawConstellationLines);
         model.addAttribute("showSatellites", drawSatellites);
         model.addAttribute("showSmallSatellites", drawSmallSatellites);
-        model.addAttribute("skyMapImage", skyMapService.drawSkyMap(nowUTC, drawStars, drawConstellationLines, drawSatellites, drawSmallSatellites));
+        model.addAttribute("skyMapImage", skyMapService.drawSkyMap(nowUTC,
+                drawStars, drawConstellationLines, drawSatellites, drawSmallSatellites, calculationMode));
     }
 
     private String formatTime(ZonedDateTime dateTime, String pattern) {

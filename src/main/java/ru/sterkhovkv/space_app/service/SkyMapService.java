@@ -1,5 +1,7 @@
 package ru.sterkhovkv.space_app.service;
 
+import ru.sterkhovkv.space_app.enums.CalculationMode;
+
 import java.time.ZonedDateTime;
 
 public interface SkyMapService {
@@ -7,5 +9,6 @@ public interface SkyMapService {
                       Boolean drawStars,
                       Boolean drawConstellationLines,
                       Boolean drawSatellites,
-                      Boolean showSmallSatellites);
+                      Boolean showSmallSatellites,
+                      CalculationMode calculationMode);
 }

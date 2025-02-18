@@ -6,4 +6,8 @@ public interface ObserverService {
     void setObserverPosition(EarthPositionCoordinates coordinates);
 
     EarthPositionCoordinates getObserverPosition();
+
+    Integer getTimeZone();
+
+    void setTimeZone(Integer timeZone);
 }

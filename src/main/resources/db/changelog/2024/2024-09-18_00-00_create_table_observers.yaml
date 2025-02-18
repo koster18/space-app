@@ -34,6 +34,11 @@ databaseChangeLog:
                   constraints:
                     nullable: true
               - column:
+                  name: time_zone
+                  type: INTEGER
+                  constraints:
+                    nullable: true
+              - column:
                   name: last_updated
                   type: timestamp
                   constraints:

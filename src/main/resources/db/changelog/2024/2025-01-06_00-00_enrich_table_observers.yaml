@@ -20,6 +20,9 @@ databaseChangeLog:
                   name: longitude
                   value: 53.2112
               - column:
+                  name: time_zone
+                  value: 4
+              - column:
                   name: last_updated
                   value: "now()"
       rollback:

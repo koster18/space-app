@@ -48,4 +48,21 @@ public class ObserverServiceImpl implements ObserverService {
             return new EarthPositionCoordinates(observer.getLatitude(), observer.getLongitude());
         }
     }
+
+    @Override
+    public Integer getTimeZone() {
+        Observer observer = observerRepository.findFirstByName(Constants.OBSERVER_NAME);
+        if (observer == null) {
+            return null;
+        } else {
+            return observer.getTimeZone();
+        }
+    }
+
+    @Override
+    public void setTimeZone(Integer timeZone) {
+        Observer observer = observerRepository.findFirstByName(Constants.OBSERVER_NAME);
+        observer.setTimeZone(timeZone);
+        observerRepository.save(observer);
+    }
 }

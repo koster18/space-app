@@ -112,7 +112,23 @@
             th:text="'UTC ' + ${(offset >= 0 ? '+' + offset : offset)} + ':00'"
             th:selected="${offset == zoneOffset}"></option>
   </select>
-
+  <div>
+    <label>* Время, а так же временная зона указаны для текущего системного времени, а не для позиции наблюдателя </label>
+  </div>
+  <div>
+    <label>(что мы увидим сейчас по нашему текущему или заданному времени оказавшись в другой точке)</label>
+  </div>
+  <p></p>
+  <div>
+    <label>Режим вычисления:</label>
+    <label>
+      <input type="radio" name="calculationMode" value="SGP4" th:checked="${calculationMode == 'SGP4'}"/> SGP4
+    </label>
+    <label>
+      <input type="radio" name="calculationMode" value="KeplerNewton" th:checked="${calculationMode == 'KeplerNewton'}"/> По формулам Кеплера-Ньютона
+    </label>
+  </div>
+  <p></p>
   <div>
     <label>
       <input type="checkbox" name="autoUpdate" th:checked="${autoUpdate}" onchange="toggleAutoRefresh(this)"/>
