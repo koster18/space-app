@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface SpaceObjectRepository extends JpaRepository<SpaceObject, Integer> {
     SpaceObject findFirstByNoradCatId(int noradCatId);
+    SpaceObject findFirstByObjectName(String objectName);
     List<SpaceObject> findByEpochLessThan(ZonedDateTime dateTime);
     List<SpaceObject> findAllByVisibleAndSpaceStation(boolean visible, boolean spaceStation);
     List<SpaceObject> findAllBySpaceStationOrderByIdAsc(boolean spaceStation);

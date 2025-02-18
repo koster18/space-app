@@ -33,8 +33,7 @@
 
                 const newSkyMapImageElement = tempDiv.querySelector('#skyMapImage');
                 if (newSkyMapImageElement) {
-                  const newSkyMapImageSrc = newSkyMapImageElement.getAttribute('src');
-                  updateSkyMap(newSkyMapImageSrc);
+                  updateSkyMap(newSkyMapImageElement.getAttribute('src'));
                 } else {
                   console.error('Элемент с ID skyMapImage не найден в ответе');
                 }
@@ -42,11 +41,9 @@
               .catch(error => console.error('Error:', error));
     }
 
-
-
-    function updateSkyMap(skyMapImage) {
+    function updateSkyMap(base64Image) {
       const skyMapImageElement = document.getElementById('skyMapImage');
-      skyMapImageElement.src = skyMapImage;
+      skyMapImageElement.src = base64Image;
     }
 
     function autoRefresh() {
@@ -61,13 +58,10 @@
       }
     }
 
-
-
     function toggleAutoRefresh(checkbox) {
       autoRefreshEnabled = checkbox.checked;
       autoRefresh();
     }
-
 
     function updateDateTime() {
       const now = new Date();
@@ -83,7 +77,6 @@
       document.getElementById('localMinutes').value = minutes;
       document.getElementById('localSeconds').value = seconds;
     }
-
   </script>
 </head>
 <body>
@@ -100,20 +93,16 @@
   </div>
 
   <label for="localDate">Дата и время:</label>
-  <input type="date" id="localDate" name="localDate"
-         th:value="${currentDate}" required/>
+  <input type="date" id="localDate" name="localDate" th:value="${currentDate}" required/>
 
   <label for="localHours">Часы:</label>
-  <input type="number" id="localHours" name="localHours" min="0" max="23"
-         th:value="${currentHours}" required/>
+  <input type="number" id="localHours" name="localHours" min="0" max="23" th:value="${currentHours}" required/>
 
   <label for="localMinutes">Минуты:</label>
-  <input type="number" id="localMinutes" name="localMinutes" min="0" max="59"
-         th:value="${currentMinutes}" required/>
+  <input type="number" id="localMinutes" name="localMinutes" min="0" max="59" th:value="${currentMinutes}" required/>
 
   <label for="localSeconds">Секунды:</label>
-  <input type="number" id="localSeconds" name="localSeconds" min="0" max="59"
-         th:value="${currentSeconds}" required/>
+  <input type="number" id="localSeconds" name="localSeconds" min="0" max="59" th:value="${currentSeconds}" required/>
 
   <label for="timeZone">Временная зона (UTC):</label>
   <select id="timeZone" name="timeZone" required>
@@ -123,7 +112,23 @@
             th:text="'UTC ' + ${(offset >= 0 ? '+' + offset : offset)} + ':00'"
             th:selected="${offset == zoneOffset}"></option>
   </select>
-
+  <div>
+    <label>* Время, а так же временная зона указаны для текущего системного времени, а не для позиции наблюдателя </label>
+  </div>
+  <div>
+    <label>(что мы увидим сейчас по нашему текущему или заданному времени оказавшись в другой точке)</label>
+  </div>
+  <p></p>
+  <div>
+    <label>Режим вычисления:</label>
+    <label>
+      <input type="radio" name="calculationMode" value="SGP4" th:checked="${calculationMode == 'SGP4'}"/> SGP4
+    </label>
+    <label>
+      <input type="radio" name="calculationMode" value="KeplerNewton" th:checked="${calculationMode == 'KeplerNewton'}"/> По формулам Кеплера-Ньютона
+    </label>
+  </div>
+  <p></p>
   <div>
     <label>
       <input type="checkbox" name="autoUpdate" th:checked="${autoUpdate}" onchange="toggleAutoRefresh(this)"/>

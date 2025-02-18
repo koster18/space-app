@@ -36,6 +36,9 @@ public class Observer {
     @Column(name = "longitude")
     private double longitude;
 
+    @Column(name = "time_zone")
+    private Integer timeZone;
+
     @Column(name = "last_updated")
     private ZonedDateTime lastUpdated;
 }

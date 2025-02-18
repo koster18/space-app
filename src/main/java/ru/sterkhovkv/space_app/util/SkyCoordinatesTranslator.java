@@ -190,6 +190,7 @@ public class SkyCoordinatesTranslator {
 
     // Return SkyEquatorialCoordinates [Ra, Dec] as it will be visible
     // from observer position for satellite in given time
+    // satellite position should be given as kepler orbit parameters and will be calculated by Kepler-Newton model
     public static SkyEquatorialCoordinates calculateEquatorialCoordinates(
             SpaceObject satelliteData,
             EarthPositionCoordinates observerCoordinates,
@@ -197,6 +198,21 @@ public class SkyCoordinatesTranslator {
 
         RectangularCoordinates satelliteCoordinates = calculateSatelliteCoordinates(satelliteData, zonedDateTimeUTC);
 
+        return getSkyEquatorialCoordinates(observerCoordinates, zonedDateTimeUTC, satelliteCoordinates);
+    }
+
+    // Return SkyEquatorialCoordinates [Ra, Dec] as it will be visible
+    // from observer position for satellite in given time
+    // satellite position should be calculated by third party and given as RectangularCoordinates
+    public static SkyEquatorialCoordinates calculateEquatorialCoordinates(
+            RectangularCoordinates satelliteCoordinates,
+            EarthPositionCoordinates observerCoordinates,
+            ZonedDateTime zonedDateTimeUTC) {
+
+        return getSkyEquatorialCoordinates(observerCoordinates, zonedDateTimeUTC, satelliteCoordinates);
+    }
+
+    private static SkyEquatorialCoordinates getSkyEquatorialCoordinates(EarthPositionCoordinates observerCoordinates, ZonedDateTime zonedDateTimeUTC, RectangularCoordinates satelliteCoordinates) {
         RectangularCoordinates observerECICoordinates = calculateECIObserverCoordinates(observerCoordinates, calculateJulianDay(zonedDateTimeUTC));
         double x = satelliteCoordinates.getX() - observerECICoordinates.getX();
         double y = satelliteCoordinates.getY() - observerECICoordinates.getY();

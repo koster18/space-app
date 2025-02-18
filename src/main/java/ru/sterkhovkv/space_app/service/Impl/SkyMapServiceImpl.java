@@ -11,6 +11,7 @@ import ru.sterkhovkv.space_app.dto.SatelliteMapDTO;
 import ru.sterkhovkv.space_app.dto.SkyHorizontalCoordinates;
 import ru.sterkhovkv.space_app.dto.StarCatalogDTO;
 import ru.sterkhovkv.space_app.dto.StarMapDTO;
+import ru.sterkhovkv.space_app.enums.CalculationMode;
 import ru.sterkhovkv.space_app.service.ObserverService;
 import ru.sterkhovkv.space_app.service.SkyMapService;
 import ru.sterkhovkv.space_app.service.SpaceObjectCoordinatesService;
@@ -52,25 +53,28 @@ public class SkyMapServiceImpl implements SkyMapService {
                              Boolean drawStars,
                              Boolean drawConstellationLines,
                              Boolean drawSatellites,
-                             Boolean showSmallSatellites) {
-        BufferedImage skyMap = createSkyMap(dateTime, drawStars, drawConstellationLines, drawSatellites, showSmallSatellites);
+                             Boolean showSmallSatellites,
+                             CalculationMode calculationMode) {
+        BufferedImage skyMap = createSkyMap(dateTime, drawStars, drawConstellationLines,
+                drawSatellites, showSmallSatellites, calculationMode);
         String base64Image = null;
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             ImageIO.write(skyMap, "png", baos);
             byte[] imageBytes = baos.toByteArray();
             base64Image = "data:image/png;base64," + Base64.getEncoder().encodeToString(imageBytes);
         } catch (IOException e) {
-           log.error(e.getMessage());
+            log.error(e.getMessage());
         }
         return base64Image;
     }
 
 
     private BufferedImage createSkyMap(ZonedDateTime dateTime,
-                                      boolean showStars,
-                                      boolean showConstellationLines,
-                                      boolean showSpaceStations,
-                                      boolean showSmallSatellites) {
+                                       boolean showStars,
+                                       boolean showConstellationLines,
+                                       boolean showSpaceStations,
+                                       boolean showSmallSatellites,
+                                       CalculationMode calculationMode) {
         BufferedImage skyMap = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = skyMap.createGraphics();
 
@@ -96,9 +100,9 @@ public class SkyMapServiceImpl implements SkyMapService {
 
         if (showConstellationLines) drawConstellations(g2d, calculateConstellationLines(position, dateTime));
 
-        if (showSpaceStations) drawSatellites(g2d, calculateSpaceStationsCoordinates(position, dateTime));
+        if (showSpaceStations) drawSatellites(g2d, calculateSpaceStationsCoordinates(position, dateTime, calculationMode));
 
-        if (showSmallSatellites) drawSatellites(g2d, calculateSmallSatelliteCoordinates(position, dateTime));
+        if (showSmallSatellites) drawSatellites(g2d, calculateSmallSatelliteCoordinates(position, dateTime, calculationMode));
 
         log.info("Время выполнения метода drawAllStar: {} мс", (System.currentTimeMillis() - startTime));
 
@@ -336,11 +340,13 @@ public class SkyMapServiceImpl implements SkyMapService {
         double endLineAlt;
     }
 
-    private List<SatelliteMapDTO> calculateSpaceStationsCoordinates(EarthPositionCoordinates position, ZonedDateTime dateTime) {
-        return spaceObjectCoordinatesService.getVisibleSpaceObjectsList(position, dateTime, true);
+    private List<SatelliteMapDTO> calculateSpaceStationsCoordinates(EarthPositionCoordinates position,
+                                                                    ZonedDateTime dateTime, CalculationMode calculationMode) {
+        return spaceObjectCoordinatesService.getVisibleSpaceObjectsList(position, dateTime, calculationMode, true);
     }
 
-    private List<SatelliteMapDTO> calculateSmallSatelliteCoordinates(EarthPositionCoordinates position, ZonedDateTime dateTime) {
-        return spaceObjectCoordinatesService.getVisibleSpaceObjectsList(position, dateTime, false);
+    private List<SatelliteMapDTO> calculateSmallSatelliteCoordinates(EarthPositionCoordinates position,
+                                                                     ZonedDateTime dateTime, CalculationMode calculationMode) {
+        return spaceObjectCoordinatesService.getVisibleSpaceObjectsList(position, dateTime, calculationMode, false);
     }
 }
